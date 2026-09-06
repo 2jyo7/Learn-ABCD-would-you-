@@ -71,7 +71,7 @@ st.markdown("---")
 current_item = ALPHABET[st.session_state.idx]
 
 # Display Card Image
-st.image(current_item["image"], caption=f"Letter {current_item['letter']} for {current_item['word']}", use_column_width=True)
+st.image(current_item["image"], caption=f"Letter {current_item['letter']} for {current_item['word']}", use_container_width=True)
 
 # Scores UI
 col1, col2 = st.columns(2)
