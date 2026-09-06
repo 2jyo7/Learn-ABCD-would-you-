@@ -133,12 +133,20 @@ btn_col1, btn_col2, btn_col3 = st.columns([1, 1, 1])
 
 with btn_col1:
     if st.button("⬅️ पिछला (Previous)", disabled=st.session_state.idx == 0):
+        # Clear current card's audio widget state
+        if f"mic_recorder_{st.session_state.idx}" in st.session_state:
+            del st.session_state[f"mic_recorder_{st.session_state.idx}"]
+        
         st.session_state.idx -= 1
-        # Revisiting previous card allows free navigation without mandatory re-test
         st.session_state.is_correct = True
         st.rerun()
+
 with btn_col2:
     if st.button("गेम दोबारा शुरू करें (Restart) 🔄"):
+        # Clear current card's audio widget state before resetting index
+        if f"mic_recorder_{st.session_state.idx}" in st.session_state:
+            del st.session_state[f"mic_recorder_{st.session_state.idx}"]
+
         st.session_state.idx = 0
         st.session_state.streak = 0
         st.session_state.score = 0
@@ -148,6 +156,10 @@ with btn_col2:
 
 with btn_col3:
     if st.button("अगला (Next) ➡️", disabled=not st.session_state.is_correct):
+        # Clear current card's audio widget state before advancing
+        if f"mic_recorder_{st.session_state.idx}" in st.session_state:
+            del st.session_state[f"mic_recorder_{st.session_state.idx}"]
+
         if st.session_state.idx + 1 < len(ALPHABET):
             st.session_state.idx += 1
             st.session_state.is_correct = False
