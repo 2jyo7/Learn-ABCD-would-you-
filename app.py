@@ -1,20 +1,20 @@
 import streamlit as st
 from transformers import pipeline
-from gtts import gTTS
+import librosa
 import re
-import os
+import time
 
 # Set Streamlit Page Configuration
 st.set_page_config(page_title="🔤 Alphabet Adventure for Kids", layout="centered")
 
-# Load lightweight speech recognition pipeline
+# Load speech recognition pipeline using librosa backend (prevents ffmpeg crashes)
 @st.cache_resource
 def load_speech_model():
     return pipeline("automatic-speech-recognition", model="openai/whisper-tiny")
 
 transcriber = load_speech_model()
 
-# Full 26 Letters List with Hindi targets and images
+# Full 26 Letters Data
 ALPHABET = [
     {"letter": "A", "word": "Apple", "valid": ["a", "apple", "ए", "एप्पल"], "image": "https://img.freepik.com/free-vector/alphabet-a-is-apple_1308-78229.jpg"},
     {"letter": "B", "word": "Ball", "valid": ["b", "bee", "ball", "बी", "बॉल"], "image": "https://img.freepik.com/free-vector/alphabet-b-is-ball_1308-78709.jpg"},
@@ -41,11 +41,11 @@ ALPHABET = [
     {"letter": "W", "word": "Watch", "valid": ["w", "double u", "watch", "डबल यू", "वॉच"], "image": "https://img.freepik.com/free-vector/alphabet-w-is-watch_1308-79055.jpg"},
     {"letter": "X", "word": "Xylophone", "valid": ["x", "ex", "xylophone", "एक्स", "जाइलोफोन"], "image": "https://img.freepik.com/free-vector/alphabet-x-is-xylophone_1308-79068.jpg"},
     {"letter": "Y", "word": "Yak", "valid": ["y", "why", "yak", "वाई", "याक"], "image": "https://img.freepik.com/free-vector/alphabet-y-is-yak_1308-79081.jpg"},
-    {"letter": "Z", "word": "Zebra", "valid": ["z", "zed", "zee", "zebra", "ज़ेड", "ज़ेब्रा"], "image": "https://img.freepik.com/free-vector/alphabet-z-is-zebra_1308-79094.jpg"}
+    {"letter": "Z", "word": "Zebra", "valid": ["z", "zed", "zee", "zebra", "ज़ेड", "ज़ेब्रा"], "image": "https://img.freepik.com/free-vector/alphabet-z-is-zebra_1308-79094.jpg"}
 ]
 
 SURPRISE_GIFTS = {
-    5: "🎁 बहुत बढ़िया! आपको मिला STAR BADGE!",
+    5: "🎁 बहुत बढ़िया! आपको मिला STAR BADGE!",
     10: "🎈 वाह! आपको मिले BALLOONS!",
     15: "🎨 शानदार! आपको मिली VIRTUAL CRAYONS!",
     20: "👑 कमाल कर दिया! आपको मिला CROWN!",
@@ -59,71 +59,91 @@ if "streak" not in st.session_state:
     st.session_state.streak = 0
 if "score" not in st.session_state:
     st.session_state.score = 0
+if "is_correct" not in st.session_state:
+    st.session_state.is_correct = False
+if "start_time" not in st.session_state:
+    st.session_state.start_time = time.time()
 
-def speak_hindi(text):
-    tts = gTTS(text=text, lang="hi")
-    tts.save("response.mp3")
-    st.audio("response.mp3", autoplay=True)
-
+# Header & Scoreboard
 st.title("🔤 बच्चों का बोलना सीखो ऐप")
+
+col1, col2, col3 = st.columns(3)
+with col1:
+    st.metric(label="🔥 Streak", value=st.session_state.streak)
+with col2:
+    st.metric(label="⭐ Total Score", value=st.session_state.score)
+with col3:
+    elapsed_time = int(time.time() - st.session_state.start_time)
+    st.metric(label="⏱️ Timer", value=f"{elapsed_time}s")
+
 st.markdown("---")
 
 current_item = ALPHABET[st.session_state.idx]
 
-# Display Card Image
-st.image(current_item["image"], caption=f"Letter {current_item['letter']} for {current_item['word']}", use_container_width=True)
+# Flashcard Container
+with st.container(border=True):
+    st.subheader(f"Card {st.session_state.idx + 1} of {len(ALPHABET)}")
+    
+    card_col1, card_col2 = st.columns([1, 1])
+    with card_col1:
+        st.image(current_item["image"], use_container_width=True)
+    with card_col2:
+        st.markdown(f"# **{current_item['letter']}**")
+        st.markdown(f"### for **{current_item['word']}**")
+        st.info(f"👉 **Speak:** '{current_item['letter']}' or '{current_item['word']}'")
 
-# Scores UI
-col1, col2 = st.columns(2)
-with col1:
-    st.metric(label="🔥 लगातार सही जवाब (Streak)", value=st.session_state.streak)
-with col2:
-    st.metric(label="⭐ कुल स्कोर (Total Score)", value=st.session_state.score)
-
-# Native Microphone Audio Input
+# Audio Input
 audio_file = st.audio_input("🎙️ माइक दबाकर अपनी आवाज रिकॉर्ड करें")
 
-if audio_file is not None:
-    # Save recording to temp file
+if audio_file is not None and not st.session_state.is_correct:
+    # Save recording locally
     with open("temp_audio.wav", "wb") as f:
         f.write(audio_file.read())
     
-    # Transcribe speech
-    result = transcriber("temp_audio.wav")
+    # Load audio array via librosa to bypass ffmpeg dependency
+    audio_data, sampling_rate = librosa.load("temp_audio.wav", sr=16000)
+    
+    # Transcribe speech with Hugging Face Whisper pipeline
+    result = transcriber(audio_data)
     spoken_text = result["text"].strip().lower()
     spoken_text = re.sub(r'[^\w\s]', '', spoken_text)
     
-    is_correct = any(val in spoken_text for val in current_item["valid"])
+    st.write(f"🗣️ **You said:** *'{spoken_text}'*")
     
-    if is_correct:
+    # Check correctness
+    if any(val in spoken_text for val in current_item["valid"]):
+        st.session_state.is_correct = True
         st.session_state.streak += 1
         st.session_state.score += 1
-        st.success(f"✅ शाबाश! सही जवाब!")
+        st.success("✅ शाबाश! सही जवाब! 'Next' बटन दबाकर आगे बढ़ें.")
         
-        # Check for streak gifts
+        # Surprise Rewards
         if st.session_state.streak in SURPRISE_GIFTS:
-            gift = SURPRISE_GIFTS[st.session_state.streak]
             st.balloons()
-            st.info(gift)
-            speak_hindi(f"शाबाश! {gift}")
-        else:
-            speak_hindi("शाबाश! आपका जवाब सही है!")
-            
-        # Check Grand Finale completion
-        if st.session_state.idx + 1 >= len(ALPHABET):
-            st.snow()
-            st.title("🏆 GRAND FINALE TROPHY UNLOCKED! YOU WIN! 🏆")
-            speak_hindi("बधाई हो! आपने सारे अक्षर सीख लिए हैं! आपको मिलता है ग्रैंड ट्रॉफी!")
-        else:
-            st.session_state.idx += 1
-            st.rerun()
+            st.info(SURPRISE_GIFTS[st.session_state.streak])
     else:
         st.session_state.streak = 0
         st.error(f"❌ फिर से कोशिश करो! बोलो '{current_item['letter']}' या '{current_item['word']}'")
-        speak_hindi(f"फिर से कोशिश करो! बोलो {current_item['letter']} फॉर {current_item['word']}")
 
-if st.button("गेम दोबारा शुरू करें (Restart) 🔄"):
-    st.session_state.idx = 0
-    st.session_state.streak = 0
-    st.session_state.score = 0
-    st.rerun()
+# Progression Control: Next button enables ONLY after correct answer
+st.markdown("---")
+btn_col1, btn_col2 = st.columns([1, 1])
+
+with btn_col1:
+    if st.button("गेम दोबारा शुरू करें (Restart) 🔄"):
+        st.session_state.idx = 0
+        st.session_state.streak = 0
+        st.session_state.score = 0
+        st.session_state.is_correct = False
+        st.session_state.start_time = time.time()
+        st.rerun()
+
+with btn_col2:
+    if st.button("अगला अक्षर (Next) ➡️", disabled=not st.session_state.is_correct):
+        if st.session_state.idx + 1 < len(ALPHABET):
+            st.session_state.idx += 1
+            st.session_state.is_correct = False
+            st.rerun()
+        else:
+            st.snow()
+            st.title("🏆 GRAND FINALE TROPHY UNLOCKED! YOU WIN! 🏆")
