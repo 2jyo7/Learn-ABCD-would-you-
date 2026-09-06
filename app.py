@@ -14,7 +14,7 @@ def load_speech_model():
 
 transcriber = load_speech_model()
 
-# Full 26 Letters Data mapped with relevant image URLs for each word
+# Full 26 Letters Data mapped with relevant image URLs
 ALPHABET = [
     {"letter": "A", "word": "Apple", "valid": ["a", "apple", "ए", "एप्पल"], "image": "https://img.freepik.com/free-vector/isolated-delicious-apple-cartoon_1308-133602.jpg"},
     {"letter": "B", "word": "Ball", "valid": ["b", "bee", "ball", "बी", "बॉल"], "image": "https://img.freepik.com/free-vector/colorful-ball-cartoon-style_1308-133202.jpg"},
@@ -63,9 +63,11 @@ if "is_correct" not in st.session_state:
     st.session_state.is_correct = False
 if "start_time" not in st.session_state:
     st.session_state.start_time = time.time()
+if "reset_count" not in st.session_state:
+    st.session_state.reset_count = 0
 
 # Header & Scoreboard
-st.title("🔤 बच्चों का बोलना सीखो ऐप")
+st.title("🔤 ABCD ऐप")
 
 col1, col2, col3 = st.columns(3)
 with col1:
@@ -92,13 +94,13 @@ with st.container(border=True):
         st.markdown(f"### for **{current_item['word']}**")
         st.info(f"👉 **Speak:** '{current_item['letter']}' or '{current_item['word']}'")
 
-# Dynamic audio input reset per card
+# Audio input (Dynamic key prevents cached audio widget persistence)
 audio_file = st.audio_input(
     "🎙️ माइक दबाकर अपनी आवाज रिकॉर्ड करें", 
-    key=f"mic_recorder_{st.session_state.idx}"
+    key=f"mic_recorder_{st.session_state.idx}_{st.session_state.reset_count}"
 )
 
-if audio_file is not None and not st.session_state.is_correct:
+if audio_file is not None:
     with open("temp_audio.wav", "wb") as f:
         f.write(audio_file.read())
     
@@ -117,7 +119,7 @@ if audio_file is not None and not st.session_state.is_correct:
         st.session_state.is_correct = True
         st.session_state.streak += 1
         st.session_state.score += 1
-        st.success("✅ शाबाश! सही जवाब! 'Next' बटन दबाकर आगे बढ़ें.")
+        st.success("✅ शाबाश! सही जवाब!")
         
         # Surprise Rewards
         if st.session_state.streak in SURPRISE_GIFTS:
@@ -133,33 +135,23 @@ btn_col1, btn_col2, btn_col3 = st.columns([1, 1, 1])
 
 with btn_col1:
     if st.button("⬅️ पिछला (Previous)", disabled=st.session_state.idx == 0):
-        # Clear current card's audio widget state
-        if f"mic_recorder_{st.session_state.idx}" in st.session_state:
-            del st.session_state[f"mic_recorder_{st.session_state.idx}"]
-        
         st.session_state.idx -= 1
         st.session_state.is_correct = True
         st.rerun()
 
 with btn_col2:
     if st.button("गेम दोबारा शुरू करें (Restart) 🔄"):
-        # Clear current card's audio widget state before resetting index
-        if f"mic_recorder_{st.session_state.idx}" in st.session_state:
-            del st.session_state[f"mic_recorder_{st.session_state.idx}"]
-
         st.session_state.idx = 0
         st.session_state.streak = 0
         st.session_state.score = 0
         st.session_state.is_correct = False
         st.session_state.start_time = time.time()
+        # Incrementing reset_count gives st.audio_input a brand new key, purging old audio
+        st.session_state.reset_count += 1
         st.rerun()
 
 with btn_col3:
     if st.button("अगला (Next) ➡️", disabled=not st.session_state.is_correct):
-        # Clear current card's audio widget state before advancing
-        if f"mic_recorder_{st.session_state.idx}" in st.session_state:
-            del st.session_state[f"mic_recorder_{st.session_state.idx}"]
-
         if st.session_state.idx + 1 < len(ALPHABET):
             st.session_state.idx += 1
             st.session_state.is_correct = False
