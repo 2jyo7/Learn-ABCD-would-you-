@@ -134,9 +134,9 @@ btn_col1, btn_col2, btn_col3 = st.columns([1, 1, 1])
 with btn_col1:
     if st.button("⬅️ पिछला (Previous)", disabled=st.session_state.idx == 0):
         st.session_state.idx -= 1
-        st.session_state.is_correct = False
+        # Revisiting previous card allows free navigation without mandatory re-test
+        st.session_state.is_correct = True
         st.rerun()
-
 with btn_col2:
     if st.button("गेम दोबारा शुरू करें (Restart) 🔄"):
         st.session_state.idx = 0
