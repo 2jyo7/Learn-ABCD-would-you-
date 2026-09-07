@@ -133,6 +133,8 @@ audio_key = f"mic_{st.session_state.idx}_{st.session_state.reset_count}_{st.sess
 audio_file = st.audio_input("🎙️ माइक दबाकर अपनी आवाज रिकॉर्ड करें", key=audio_key)
 
 if audio_file is not None:
+    # Clear the previous error message immediately as soon as new audio is submitted
+    st.session_state.error_msg = ""
     with open("temp_audio.wav", "wb") as f:
         f.write(audio_file.read())
     
@@ -146,7 +148,6 @@ if audio_file is not None:
         st.session_state.is_correct = True
         st.session_state.streak += 1
         st.session_state.score += 1
-        st.session_state.error_msg = ""
         st.success("✅ शाबाश! सही जवाब!")
     else:
         # Reset streak, save feedback message, increment attempt_id, and rerun
