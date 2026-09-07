@@ -16,33 +16,34 @@ def load_speech_model():
 
 transcriber = load_speech_model()
 
+# Alphabet items with integrated Letter + Object images
 ALPHABET = [
-    {"letter": "A", "word": "Apple", "image": "https://img.freepik.com/free-vector/red-apple-cartoon-style_1308-133602.jpg"},
-    {"letter": "B", "word": "Ball", "image": "https://img.freepik.com/free-vector/colorful-ball-cartoon-style_1308-133202.jpg"},
-    {"letter": "C", "word": "Cat", "image": "https://img.freepik.com/free-vector/cute-cat-sitting-cartoon-vector-icon-illustration_138676-2313.jpg"},
-    {"letter": "D", "word": "Dog", "image": "https://img.freepik.com/free-vector/cute-dog-sitting-cartoon-vector-icon-illustration_138676-2312.jpg"},
-    {"letter": "E", "word": "Elephant", "image": "https://img.freepik.com/free-vector/cute-elephant-sitting-cartoon-vector-icon-illustration_138676-2220.jpg"},
-    {"letter": "F", "word": "Fish", "image": "https://img.freepik.com/free-vector/cute-fish-swimming-cartoon-vector-icon-illustration_138676-2216.jpg"},
-    {"letter": "G", "word": "Grapes", "image": "https://img.freepik.com/free-vector/fresh-grapes-bunch-cartoon-icon-illustration_138676-2882.jpg"},
-    {"letter": "H", "word": "Hat", "image": "https://img.freepik.com/free-vector/stylish-hat-cartoon-vector-icon-illustration_138676-3215.jpg"},
-    {"letter": "I", "word": "Ice cream", "image": "https://img.freepik.com/free-vector/delicious-ice-cream-cone-cartoon-vector-icon-illustration_138676-2287.jpg"},
-    {"letter": "J", "word": "Juice", "image": "https://img.freepik.com/free-vector/orange-juice-glass-cartoon-vector-icon-illustration_138676-2283.jpg"},
-    {"letter": "K", "word": "Kite", "image": "https://img.freepik.com/free-vector/colorful-kite-flying-cartoon-vector-icon-illustration_138676-3190.jpg"},
-    {"letter": "L", "word": "Lion", "image": "https://img.freepik.com/free-vector/cute-lion-sitting-cartoon-vector-icon-illustration_138676-2211.jpg"},
-    {"letter": "M", "word": "Monkey", "image": "https://img.freepik.com/free-vector/cute-monkey-sitting-cartoon-vector-icon-illustration_138676-2208.jpg"},
-    {"letter": "N", "word": "Nest", "image": "https://img.freepik.com/free-vector/bird-nest-with-eggs-cartoon-vector-icon-illustration_138676-3180.jpg"},
-    {"letter": "O", "word": "Orange", "image": "https://img.freepik.com/free-vector/fresh-orange-fruit-cartoon-vector-icon-illustration_138676-2882.jpg"},
-    {"letter": "P", "word": "Parrot", "image": "https://img.freepik.com/free-vector/cute-parrot-sitting-cartoon-vector-icon-illustration_138676-2201.jpg"},
-    {"letter": "Q", "word": "Queen", "image": "https://img.freepik.com/free-vector/cute-queen-wearing-crown-cartoon-vector-icon-illustration_138676-3310.jpg"},
-    {"letter": "R", "word": "Rabbit", "image": "https://img.freepik.com/free-vector/cute-rabbit-sitting-cartoon-vector-icon-illustration_138676-2189.jpg"},
-    {"letter": "S", "word": "Sun", "image": "https://img.freepik.com/free-vector/cute-sun-smiling-cartoon-vector-icon-illustration_138676-2180.jpg"},
-    {"letter": "T", "word": "Tiger", "image": "https://img.freepik.com/free-vector/cute-tiger-sitting-cartoon-vector-icon-illustration_138676-2175.jpg"},
-    {"letter": "U", "word": "Umbrella", "image": "https://img.freepik.com/free-vector/opened-umbrella-cartoon-vector-icon-illustration_138676-3150.jpg"},
-    {"letter": "V", "word": "Van", "image": "https://img.freepik.com/free-vector/delivery-van-cartoon-vector-icon-illustration_138676-3140.jpg"},
-    {"letter": "W", "word": "Watch", "image": "https://img.freepik.com/free-vector/wrist-watch-cartoon-vector-icon-illustration_138676-3130.jpg"},
-    {"letter": "X", "word": "Xylophone", "image": "https://img.freepik.com/free-vector/colorful-xylophone-cartoon-vector-icon-illustration_138676-3120.jpg"},
-    {"letter": "Y", "word": "Yak", "image": "https://img.freepik.com/free-vector/cute-yak-standing-cartoon-vector-icon-illustration_138676-2150.jpg"},
-    {"letter": "Z", "word": "Zebra", "image": "https://img.freepik.com/free-vector/cute-zebra-standing-cartoon-vector-icon-illustration_138676-2140.jpg"}
+    {"letter": "A", "word": "Apple", "image": "https://img.freepik.com/free-vector/letter-a-apple_1308-76815.jpg"},
+    {"letter": "B", "word": "Ball", "image": "https://img.freepik.com/free-vector/letter-b-ball_1308-76822.jpg"},
+    {"letter": "C", "word": "Cat", "image": "https://img.freepik.com/free-vector/letter-c-cat_1308-76829.jpg"},
+    {"letter": "D", "word": "Dog", "image": "https://img.freepik.com/free-vector/letter-d-dog_1308-76836.jpg"},
+    {"letter": "E", "word": "Elephant", "image": "https://img.freepik.com/free-vector/letter-e-elephant_1308-76843.jpg"},
+    {"letter": "F", "word": "Fish", "image": "https://img.freepik.com/free-vector/letter-f-fish_1308-76850.jpg"},
+    {"letter": "G", "word": "Grapes", "image": "https://img.freepik.com/free-vector/letter-g-grapes_1308-76857.jpg"},
+    {"letter": "H", "word": "Hat", "image": "https://img.freepik.com/free-vector/letter-h-hat_1308-76864.jpg"},
+    {"letter": "I", "word": "Ice cream", "image": "https://img.freepik.com/free-vector/letter-i-ice-cream_1308-76871.jpg"},
+    {"letter": "J", "word": "Juice", "image": "https://img.freepik.com/free-vector/letter-j-juice_1308-76878.jpg"},
+    {"letter": "K", "word": "Kite", "image": "https://img.freepik.com/free-vector/letter-k-kite_1308-76885.jpg"},
+    {"letter": "L", "word": "Lion", "image": "https://img.freepik.com/free-vector/letter-l-lion_1308-76892.jpg"},
+    {"letter": "M", "word": "Monkey", "image": "https://img.freepik.com/free-vector/letter-m-monkey_1308-76899.jpg"},
+    {"letter": "N", "word": "Nest", "image": "https://img.freepik.com/free-vector/letter-n-nest_1308-76906.jpg"},
+    {"letter": "O", "word": "Orange", "image": "https://img.freepik.com/free-vector/letter-o-orange_1308-76913.jpg"},
+    {"letter": "P", "word": "Parrot", "image": "https://img.freepik.com/free-vector/letter-p-parrot_1308-76920.jpg"},
+    {"letter": "Q", "word": "Queen", "image": "https://img.freepik.com/free-vector/letter-q-queen_1308-76927.jpg"},
+    {"letter": "R", "word": "Rabbit", "image": "https://img.freepik.com/free-vector/letter-r-rabbit_1308-76934.jpg"},
+    {"letter": "S", "word": "Sun", "image": "https://img.freepik.com/free-vector/letter-s-sun_1308-76941.jpg"},
+    {"letter": "T", "word": "Tiger", "image": "https://img.freepik.com/free-vector/letter-t-tiger_1308-76948.jpg"},
+    {"letter": "U", "word": "Umbrella", "image": "https://img.freepik.com/free-vector/letter-u-umbrella_1308-76955.jpg"},
+    {"letter": "V", "word": "Van", "image": "https://img.freepik.com/free-vector/letter-v-van_1308-76962.jpg"},
+    {"letter": "W", "word": "Watch", "image": "https://img.freepik.com/free-vector/letter-w-watch_1308-76969.jpg"},
+    {"letter": "X", "word": "Xylophone", "image": "https://img.freepik.com/free-vector/letter-x-xylophone_1308-76976.jpg"},
+    {"letter": "Y", "word": "Yak", "image": "https://img.freepik.com/free-vector/letter-y-yak_1308-76983.jpg"},
+    {"letter": "Z", "word": "Zebra", "image": "https://img.freepik.com/free-vector/letter-z-zebra_1308-76990.jpg"}
 ]
 
 LETTER_HOMOPHONES = {
@@ -110,6 +111,14 @@ if "error_msg" not in st.session_state:
 if "surprise_gift" not in st.session_state:
     st.session_state.surprise_gift = ""
 
+# Key name for current audio input
+audio_key = f"mic_{st.session_state.idx}_{st.session_state.reset_count}_{st.session_state.attempt_id}"
+
+# FIX FOR ERROR MESSAGE PERSISTENCE:
+# Clear error_msg at top of script run if a new audio input is detected
+if audio_key in st.session_state and st.session_state[audio_key] is not None:
+    st.session_state.error_msg = ""
+
 # Header
 st.title("🔤 बच्चों का बोलना सीखो ऐप")
 
@@ -163,11 +172,10 @@ with st.container(border=True):
         """
         components.html(tts_code, height=60)
 
-# Render error message ONLY if it hasn't been cleared
+# Display error message only when present
 if st.session_state.error_msg:
     st.error(st.session_state.error_msg)
 
-audio_key = f"mic_{st.session_state.idx}_{st.session_state.reset_count}_{st.session_state.attempt_id}"
 audio_file = st.audio_input("🎙️ माइक दबाकर अपनी आवाज रिकॉर्ड करें", key=audio_key)
 
 if audio_file is not None:
