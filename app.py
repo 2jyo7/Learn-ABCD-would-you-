@@ -164,8 +164,9 @@ with st.container(border=True):
         function speak() {{
             window.speechSynthesis.cancel();
             var msg = new SpeechSynthesisUtterance('{phrase_to_say}');
-            msg.rate = 0.8;
-            msg.pitch = 1.1;
+            msg.rate = 0.65;  // Slower speech rate (0.1 to 10, 1 is normal)
+            msg.pitch = 0.9;   // Warmer tone (0 to 2, 1 is default)
+            msg.volume = 0.7;  // Softer volume (0 to 1)
             window.speechSynthesis.speak(msg);
         }}
         </script>
