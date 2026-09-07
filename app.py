@@ -3,6 +3,7 @@ import time
 import jellyfish
 import librosa
 import streamlit as st
+import streamlit.components.v1 as components
 from transformers import pipeline
 
 # Set Streamlit Page Configuration
@@ -16,7 +17,7 @@ def load_speech_model():
 transcriber = load_speech_model()
 
 ALPHABET = [
-    {"letter": "A", "word": "Apple", "image": "https://img.freepik.com/free-vector/isolated-delicious-apple-cartoon_1308-133602.jpg"},
+    {"letter": "A", "word": "Apple", "image": "https://img.freepik.com/free-vector/red-apple-cartoon-style_1308-133602.jpg"},
     {"letter": "B", "word": "Ball", "image": "https://img.freepik.com/free-vector/colorful-ball-cartoon-style_1308-133202.jpg"},
     {"letter": "C", "word": "Cat", "image": "https://img.freepik.com/free-vector/cute-cat-sitting-cartoon-vector-icon-illustration_138676-2313.jpg"},
     {"letter": "D", "word": "Dog", "image": "https://img.freepik.com/free-vector/cute-dog-sitting-cartoon-vector-icon-illustration_138676-2312.jpg"},
@@ -45,7 +46,7 @@ ALPHABET = [
 ]
 
 LETTER_HOMOPHONES = {
-    "A": ["a", "eh", "ay", "hey", "hay", "eight", "ei"],
+    "A": ["a", "eh", "ay", "hey", "hay", "eight", "ei", "a4"],
     "B": ["b", "be", "bee"],
     "C": ["c", "see", "sea"],
     "D": ["d", "dee"],
@@ -59,6 +60,14 @@ LETTER_HOMOPHONES = {
     "T": ["t", "tea", "tee"],
     "U": ["u", "you"],
     "Y": ["y", "why"]
+}
+
+SURPRISE_GIFTS = {
+    5: "⭐ STAR BADGE UNLOCKED! Bright Super Star!",
+    10: "🎈 BALLOONS UNLOCKED! Flying High!",
+    15: "🎨 VIRTUAL CRAYONS UNLOCKED! Time to Color!",
+    20: "👑 GOLDEN CROWN UNLOCKED! You are King/Queen of Alphabets!",
+    25: "🚀 SPACE ROCKET BADGE UNLOCKED! Ready for Takeoff!"
 }
 
 def validate_pronunciation(spoken_text: str, target_letter: str, target_word: str) -> bool:
@@ -98,6 +107,8 @@ if "attempt_id" not in st.session_state:
     st.session_state.attempt_id = 0
 if "error_msg" not in st.session_state:
     st.session_state.error_msg = ""
+if "surprise_gift" not in st.session_state:
+    st.session_state.surprise_gift = ""
 
 # Header
 st.title("🔤 बच्चों का बोलना सीखो ऐप")
@@ -123,18 +134,43 @@ with st.container(border=True):
         st.markdown(f"# **{current_item['letter']}**")
         st.markdown(f"### for **{current_item['word']}**")
         st.info(f"👉 **Speak:** '{current_item['letter']}' or '{current_item['word']}'")
+        
+        # Audio Player Component using Web Speech API
+        phrase_to_say = f"{current_item['letter']} for {current_item['word']}"
+        tts_code = f"""
+        <button onclick="speak()" style="
+            background-color: #FF4B4B;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 5px;">
+            🔊 सुनिए (Listen Pronunciation)
+        </button>
+        <script>
+        function speak() {{
+            window.speechSynthesis.cancel();
+            var msg = new SpeechSynthesisUtterance('{phrase_to_say}');
+            msg.rate = 0.8;
+            msg.pitch = 1.1;
+            window.speechSynthesis.speak(msg);
+        }}
+        </script>
+        """
+        components.html(tts_code, height=60)
 
-# Display persisted error message from previous attempt if present
+# Render error message ONLY if it hasn't been cleared
 if st.session_state.error_msg:
     st.error(st.session_state.error_msg)
 
-# Dynamic key incorporates card index, reset count, and attempt ID
 audio_key = f"mic_{st.session_state.idx}_{st.session_state.reset_count}_{st.session_state.attempt_id}"
 audio_file = st.audio_input("🎙️ माइक दबाकर अपनी आवाज रिकॉर्ड करें", key=audio_key)
 
 if audio_file is not None:
-    # Clear the previous error message immediately as soon as new audio is submitted
-    st.session_state.error_msg = ""
     with open("temp_audio.wav", "wb") as f:
         f.write(audio_file.read())
     
@@ -145,12 +181,20 @@ if audio_file is not None:
     st.write(f"🗣️ **You said:** *'{spoken_text}'*")
     
     if validate_pronunciation(spoken_text, current_item["letter"], current_item["word"]):
+        st.session_state.error_msg = ""
         st.session_state.is_correct = True
         st.session_state.streak += 1
         st.session_state.score += 1
         st.success("✅ शाबाश! सही जवाब!")
+
+        if st.session_state.score in SURPRISE_GIFTS:
+            st.session_state.surprise_gift = SURPRISE_GIFTS[st.session_state.score]
+            st.balloons()
+            
+        if st.session_state.surprise_gift:
+            st.info(f"🎁 **SURPRISE UNLOCKED:** {st.session_state.surprise_gift}")
+
     else:
-        # Reset streak, save feedback message, increment attempt_id, and rerun
         st.session_state.streak = 0
         st.session_state.error_msg = f"❌ फिर से कोशिश करो! आपने बोला: '{spoken_text}'. बोलो '{current_item['letter']}' या '{current_item['word']}'"
         st.session_state.attempt_id += 1
@@ -175,6 +219,7 @@ with btn_col2:
         st.session_state.score = 0
         st.session_state.is_correct = False
         st.session_state.error_msg = ""
+        st.session_state.surprise_gift = ""
         st.session_state.attempt_id = 0
         st.session_state.start_time = time.time()
         st.session_state.reset_count += 1
@@ -190,4 +235,6 @@ with btn_col3:
             st.rerun()
         else:
             st.snow()
+            st.balloons()
             st.title("🏆 GRAND FINALE TROPHY UNLOCKED! YOU WIN! 🏆")
+            st.balloons()
